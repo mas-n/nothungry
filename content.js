@@ -1,45 +1,52 @@
 // Function to hide the feed
 function hideFeed() {
-    if (window.location.host.includes("twitter.com")) {
-      const feed = document.querySelector('[aria-label="Timeline: Your Home Timeline"]');
-      if (feed) feed.style.display = "none";
-    } else if (window.location.host.includes("instagram.com")) {
-      const feed = document.querySelector('[role="feed"]');
-      if (feed) feed.style.display = "none";
+    let feed = document.querySelector('[aria-label="Timeline: Your Home Timeline"]');
+    if (!feed) {
+        feed = document.querySelector('div[data-testid="primaryColumn"] section');
     }
-  }
-  
-  // Function to show the feed
-  function showFeed() {
-    if (window.location.host.includes("twitter.com")) {
-      const feed = document.querySelector('[aria-label="Timeline: Your Home Timeline"]');
-      if (feed) feed.style.display = "block";
-    } else if (window.location.host.includes("instagram.com")) {
-      const feed = document.querySelector('[role="feed"]');
-      if (feed) feed.style.display = "block";
+    if (feed) {
+        feed.style.visibility = "hidden"; // Hide feed using visibility
+        console.log("Feed hidden.");
+    } else {
+        console.log("Feed not found!");
     }
-  }
-  
-  // Listen for messages from the popup or background
-  chrome.runtime.onMessage.addListener((message) => {
-    if (message.action === "hideFeed") {
-      hideFeed();
-    } else if (message.action === "showFeed") {
-      showFeed();
-    } else if (message.action === "toggleFeed") {
-      const feed = document.querySelector('[role="feed"], [aria-label="Timeline: Your Home Timeline"]');
-      if (feed && feed.style.display === "none") {
-        showFeed();
-      } else {
+}
+
+// Function to show the feed
+function showFeed() {
+    let feed = document.querySelector('[aria-label="Timeline: Your Home Timeline"]');
+    if (!feed) {
+        feed = document.querySelector('div[data-testid="primaryColumn"] section');
+    }
+    if (feed) {
+        feed.style.visibility = "visible"; // Show feed by restoring visibility
+        console.log("Feed shown.");
+    } else {
+        console.log("Feed not found!");
+    }
+}
+
+// Listen for messages from the background script to hide or show the feed
+chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+    if (message.action === 'hideFeed') {
         hideFeed();
-      }
+        sendResponse({ status: "Feed hidden" });
+    } else if (message.action === 'showFeed') {
+        showFeed();
+        sendResponse({ status: "Feed shown" });
     }
-  });
-  
-  // Check the saved state on page load
-  chrome.storage.sync.get("feedHidden", (data) => {
-    if (data.feedHidden) {
-      hideFeed();
-    }
-  });
-  
+});
+
+// Check and apply feed state from Chrome storage when the page loads
+function applyFeedState() {
+    chrome.storage.sync.get('feedState', function(data) {
+        if (data.feedState === 'hidden') {
+            hideFeed(); // Hide the feed if stored state is 'hidden'
+        } else {
+            showFeed(); // Show the feed if stored state is 'visible'
+        }
+    });
+}
+
+// Apply the stored feed state when the page loads
+applyFeedState();
