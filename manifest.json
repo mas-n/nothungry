@@ -1,0 +1,32 @@
+{
+    "manifest_version": 3,
+    "name": "Not Hungry",
+    "version": "1.0",
+    "description": "Turn off the feeds of Twitter and Instagram and leave posting functionality.",
+    "permissions": [
+      "activeTab",
+      "storage",
+      "tabs"
+    ],
+    "background": {
+      "service_worker": "background.js"
+    },
+    "action": {
+      "default_popup": "popup.html"
+    },
+    "content_scripts": [
+      {
+        "matches": ["*://*.twitter.com/*", "*://*.instagram.com/*"],
+        "js": ["content.js"]
+      }
+    ],
+    "commands": {
+      "toggle-feed": {
+        "suggested_key": {
+          "default": "Ctrl+Shift+F"
+        },
+        "description": "Toggle Twitter/Instagram feed visibility"
+      }
+    }
+  }
+  
